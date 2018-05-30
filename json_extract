@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+
+# Get JSON from STDIN, and extract things from inside with dot-separated notation.
+# Exmaple: cat sample.json | json_extract 'some_key.0.another_key'
+
+import sys, json
+
+original_input = sys.argv[1]
+keys = original_input.split('.')[::-1]
+
+json_input = ''.join(sys.stdin.readlines())
+json_result = json.loads(json_input)
+
+current_result = json_result
+while keys:
+  next_step = keys.pop()
+  if next_step.isdigit():
+    next_step = int(next_step)
+
+  try:
+    current_result = current_result[next_step]
+  except KeyError:
+    print("Could not find '%s'." % original_input)
+    print('Keys on this level: "%s"' % '", "'.join(current_result.keys()))
+    sys.exit(1)
+
+
+print(json.dumps(current_result, indent=2, sort_keys=True))
